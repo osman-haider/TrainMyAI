@@ -6,7 +6,7 @@ from src.utils import traning_log
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-def binary_classification_cofig(st):
+def binary_classification_cofig(st, input_value):
     binary_cl = binary_classification_model_creation.Binary_Classification()
 
     # Check if the model is already trained
@@ -28,7 +28,7 @@ def binary_classification_cofig(st):
         binary_cl.model_creation()
 
         st.write("Training the model...")
-        history = binary_cl.train_model(epochs=20)
+        history = binary_cl.train_model(epochs=input_value)
 
         # Clear temporary messages after training
         preprocess_placeholder.empty()

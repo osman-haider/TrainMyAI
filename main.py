@@ -21,7 +21,7 @@ def main():
     if "binary_cl" not in st.session_state:
         st.session_state["binary_cl"] = None
 
-    search_method, selected_parent, selected_child = side_bar.sidebar_ui(st)
+    search_method, selected_parent, selected_child, input_value = side_bar.sidebar_ui(st)
 
     if st.session_state["process_completed"]:
         st.header("Model Training")
@@ -30,7 +30,7 @@ def main():
             if selected_parent == "Image Classification":
                 if selected_child == "Binary Classification":
 
-                    binary_classification_ui.binary_classification_cofig(st)
+                    binary_classification_ui.binary_classification_cofig(st, input_value)
 
                 elif selected_child == "Multi Class Classification":
                     st.info("CNN ---> Image Classification ---> Multi Class Classification")
