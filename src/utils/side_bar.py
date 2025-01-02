@@ -1,4 +1,6 @@
 from src.utils import extract_file
+import os
+import shutil
 
 def sidebar_ui(st):
     with st.sidebar:
@@ -92,6 +94,20 @@ def sidebar_ui(st):
                 st.session_state["process_completed"] = False
                 st.session_state["model_trained"] = False
                 st.session_state["binary_cl"] = None
+
+                # Check if the `extracted_folder` exists
+                extracted_folder_path = "extracted_folder"
+                if os.path.exists(extracted_folder_path) and os.path.isdir(extracted_folder_path):
+                    # Delete all contents of the folder
+                    for filename in os.listdir(extracted_folder_path):
+                        file_path = os.path.join(extracted_folder_path, filename)
+                        try:
+                            if os.path.isfile(file_path) or os.path.islink(file_path):
+                                os.unlink(file_path)  # Remove file or symbolic link
+                            elif os.path.isdir(file_path):
+                                shutil.rmtree(file_path)  # Remove directory
+                        except Exception as e:
+                            st.error(f"Failed to delete {file_path}. Reason: {e}")
 
                 st.success("Processing uploaded zip file")
                 extract_file.extract_zip(uploaded_file)
