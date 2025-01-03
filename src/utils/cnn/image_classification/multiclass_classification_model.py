@@ -9,22 +9,27 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 class multiclass_classifiction:
+    """
+    This class handles the entire process of creating, training, and evaluating a CNN model for multi-class image classification.
+    """
     def __init__(self):
+        """
+        Initialize the class with necessary attributes such as data directories, model parameters, and placeholders for generators and models.
+        """
         self.data_dir = 'extracted_folder'
-        # self.data = tf.keras.utils.image_dataset_from_directory(self.data_dir)
-        # self.class_names = self.data.class_names  # Retrieve class names dynamically
         self.train_generator = None
         self.val_generator = None
         self.model = None
         self.history = None
 
-        # Parameters
         self.batch_size = 32
         self.image_size = (150, 150)  # Resize all images to this size
         self.num_classes = len(os.listdir(self.data_dir))  # Number of subfolders/classes
 
     def train_data_generator(self):
-        # Create an ImageDataGenerator for training with data augmentation
+        """
+        Create and configure the training data generator with data augmentation.
+        """
         train_datagen = ImageDataGenerator(
             rescale=1.0 / 255.0,  # Normalize pixel values
             rotation_range=30,  # Random rotation
@@ -37,7 +42,6 @@ class multiclass_classifiction:
             validation_split=0.2  # Reserve 20% for validation
         )
 
-        # Training data generator with augmentation
         self.train_generator = train_datagen.flow_from_directory(
             self.data_dir,
             target_size=self.image_size,
@@ -47,7 +51,9 @@ class multiclass_classifiction:
         )
 
     def val_data_generator(self):
-        # Validation data generator (no augmentation, only rescaling)
+        """
+        Create and configure the validation data generator without data augmentation.
+        """
         val_datagen = ImageDataGenerator(
             rescale=1.0 / 255.0,
             validation_split=0.2
@@ -62,7 +68,9 @@ class multiclass_classifiction:
         )
 
     def cnn_model_buliding(self):
-        # Build the CNN model
+        """
+        Build the Convolutional Neural Network (CNN) model with several layers.
+        """
         self.model = Sequential([
             Conv2D(32, (3, 3), activation='relu', input_shape=(*self.image_size, 3)),
             MaxPooling2D((2, 2)),
@@ -80,7 +88,9 @@ class multiclass_classifiction:
         ])
 
     def model_complie(self):
-        # Compile the model
+        """
+        Compile the CNN model with the Adam optimizer, categorical cross-entropy loss, and accuracy as the evaluation metric.
+        """
         self.model.compile(
             optimizer='adam',
             loss='categorical_crossentropy',
@@ -88,9 +98,16 @@ class multiclass_classifiction:
         )
 
     def model_fit(self, epochs=20):
+        """
+        Train the CNN model using the training and validation data generators for a specified number of epochs.
 
+        Args:
+            epochs (int): Number of epochs for training the model.
+
+        Returns:
+            History object containing details about the training process.
+        """
         self.model_complie()
-        # Train the model
         self.history = self.model.fit(
             self.train_generator,
             validation_data=self.val_generator,
@@ -110,19 +127,15 @@ class multiclass_classifiction:
         Returns:
             str: Prediction result based on the folder names.
         """
-        # Resize the image to match the model's input size
         img_resized = tf.image.resize(img_tensor, self.image_size)
         img_array = img_resized.numpy() / 255.0  # Normalize the image
         img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
 
-        # Predict the class
         predictions = self.model.predict(img_array)
         predicted_class = np.argmax(predictions, axis=1)
 
-        # Decode the predicted class
         class_indices = self.train_generator.class_indices
         class_labels = {v: k for k, v in class_indices.items()}  # Reverse the dictionary
         predicted_label = class_labels[predicted_class[0]]
 
         return predicted_label
-
