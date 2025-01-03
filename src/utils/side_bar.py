@@ -106,7 +106,7 @@ def sidebar_ui(st):
             else:
                 st.session_state["process_completed"] = False
                 st.session_state["model_trained"] = False
-                st.session_state["binary_cl"] = None
+                st.session_state["model_obj"] = None
 
                 extracted_folder_path = "extracted_folder"
                 if os.path.exists(extracted_folder_path) and os.path.isdir(extracted_folder_path):

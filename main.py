@@ -25,8 +25,8 @@ def main():
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
 
-    if "binary_cl" not in st.session_state:
-        st.session_state["binary_cl"] = None
+    if "model_obj" not in st.session_state:
+        st.session_state["model_obj"] = None
 
     search_method, selected_parent, selected_child, input_value = side_bar.sidebar_ui(st)
 

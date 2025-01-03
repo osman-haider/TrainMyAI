@@ -1,4 +1,4 @@
-from src.utils import side_bar, binary_classification_ui
+from src.utils import side_bar, binary_classification_ui, multiclass_classfication_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -20,7 +20,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
                 binary_classification_ui.binary_classification_cofig(st, input_value)
 
             elif selected_child == "Multi Class Classification":
-                st.info("CNN ---> Image Classification ---> Multi Class Classification")
+                multiclass_classfication_ui.multiclass_classification_cofig(st, input_value)
         elif selected_parent == "Object Detection":
             st.info("CNN ---> Object Detection")
         elif selected_parent == "Image Segmentation":
