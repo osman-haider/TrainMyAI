@@ -86,7 +86,7 @@ Provide your dataset as a zip file with the following structure:
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
 ## Contribution
-We warmly welcome contributions to TrainMyAI. Please read the [CONTRIBUTING.md](link) file before starting your contributions.
+We warmly welcome contributions to TrainMyAI. Please read the [CONTRIBUTING.md](https://github.com/osman-haider/TrainMyAI/blob/master/CONTRIBUTING.md) file before starting your contributions.
 
 ## Contact
 Feel free to reach out:
