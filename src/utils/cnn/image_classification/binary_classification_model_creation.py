@@ -2,7 +2,6 @@ import numpy as np
 import tensorflow as tf
 from tf_keras.models import Sequential
 from tf_keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-from matplotlib import pyplot as plt
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -83,34 +82,6 @@ class Binary_Classification:
             self.model.compile(optimizer='adam', loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
         self.history = self.model.fit(self.train, epochs=epochs, validation_data=self.val, callbacks=callbacks)
         return self.history
-
-    def plot_loss(self):
-        """
-        Plot the training and validation loss over epochs.
-
-        Returns:
-            matplotlib.figure.Figure: Figure containing the loss plot.
-        """
-        fig, ax = plt.subplots()
-        ax.plot(self.history.history['loss'], color='teal', label='loss')
-        ax.plot(self.history.history['val_loss'], color='orange', label='val_loss')
-        ax.set_title('Loss', fontsize=20)
-        ax.legend(loc="upper left")
-        return fig
-
-    def plot_accuracy(self):
-        """
-        Plot the training and validation accuracy over epochs.
-
-        Returns:
-            matplotlib.figure.Figure: Figure containing the accuracy plot.
-        """
-        fig, ax = plt.subplots()
-        ax.plot(self.history.history['accuracy'], color='teal', label='accuracy')
-        ax.plot(self.history.history['val_accuracy'], color='orange', label='val_accuracy')
-        ax.set_title('Accuracy', fontsize=20)
-        ax.legend(loc="upper left")
-        return fig
 
     def inference(self, img):
         """

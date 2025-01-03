@@ -1,4 +1,4 @@
-from src.utils.cnn.image_classification import binary_classification_model_creation
+from src.utils.cnn.image_classification import binary_classification_model_creation, plots
 import tensorflow as tf
 import json
 from src.utils import traning_log
@@ -67,11 +67,11 @@ def binary_classification_cofig(st, input_value):
 
     st.subheader("Training Metrics")
     col1, col2 = st.columns(2)
-
+    plot = plots.training_metrics(binary_cl.history)
     with col1:
-        st.pyplot(binary_cl.plot_loss())
+        st.pyplot(plot.plot_loss())
     with col2:
-        st.pyplot(binary_cl.plot_accuracy())
+        st.pyplot(plot.plot_accuracy())
 
     st.subheader("Download Trained Model")
     download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
