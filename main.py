@@ -4,11 +4,18 @@ from src.utils import side_bar, search_methods_conditions
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
 def main():
     """
     Main function to handle the Streamlit app logic.
     Includes dataset processing, model training, and inference functionality.
+
+    Workflow:
+    - Initializes session state variables for process tracking.
+    - Calls the sidebar UI to allow users to make selections and upload files.
+    - Based on the selections and uploads, proceeds to model training or prompts the user to complete the setup.
+
+    Returns:
+    - None. Handles the entire app logic and renders the UI dynamically.
     """
 
     # Initialize session state variables

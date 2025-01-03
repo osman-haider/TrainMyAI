@@ -7,8 +7,11 @@ from matplotlib import pyplot as plt
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
 class Binary_Classification:
+    """
+    A class for handling binary classification tasks using a convolutional neural network (CNN).
+    Includes methods for dataset preprocessing, splitting, model creation, training, and evaluation.
+    """
     def __init__(self):
         """
         Initialize the Binary Classification model and dataset.
@@ -27,6 +30,7 @@ class Binary_Classification:
     def dataset_preprocessing(self):
         """
         Normalize images and prepare the dataset for training.
+        Maps image data to a range of [0, 1] and applies shuffling and prefetching.
         """
         self.data = self.data.map(lambda x, y: (x / 255.0, y))
         self.data = self.data.shuffle(buffer_size=1000).prefetch(buffer_size=tf.data.AUTOTUNE)
@@ -34,6 +38,7 @@ class Binary_Classification:
     def splitting_dataset(self):
         """
         Properly split the dataset into training, validation, and test sets.
+        Splits 70% for training, 20% for validation, and 10% for testing.
         """
         dataset_size = len(list(self.data))
         train_size = int(0.7 * dataset_size)
@@ -46,6 +51,7 @@ class Binary_Classification:
     def model_creation(self):
         """
         Creates and compiles a convolutional neural network (CNN) model.
+        Architecture includes multiple Conv2D, MaxPooling2D layers, and a fully connected Dense layer.
         """
         self.model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(256, 256, 3)))
         self.model.add(MaxPooling2D())
@@ -65,6 +71,13 @@ class Binary_Classification:
     def train_model(self, epochs=20, callbacks=None):
         """
         Train the model on the training dataset and validate using the validation dataset.
+
+        Args:
+            epochs (int): Number of training epochs. Defaults to 20.
+            callbacks (list): Optional list of callbacks to use during training.
+
+        Returns:
+            History object containing training and validation metrics.
         """
         if not self.model._is_compiled:
             self.model.compile(optimizer='adam', loss=tf.keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
@@ -72,6 +85,12 @@ class Binary_Classification:
         return self.history
 
     def plot_loss(self):
+        """
+        Plot the training and validation loss over epochs.
+
+        Returns:
+            matplotlib.figure.Figure: Figure containing the loss plot.
+        """
         fig, ax = plt.subplots()
         ax.plot(self.history.history['loss'], color='teal', label='loss')
         ax.plot(self.history.history['val_loss'], color='orange', label='val_loss')
@@ -80,6 +99,12 @@ class Binary_Classification:
         return fig
 
     def plot_accuracy(self):
+        """
+        Plot the training and validation accuracy over epochs.
+
+        Returns:
+            matplotlib.figure.Figure: Figure containing the accuracy plot.
+        """
         fig, ax = plt.subplots()
         ax.plot(self.history.history['accuracy'], color='teal', label='accuracy')
         ax.plot(self.history.history['val_accuracy'], color='orange', label='val_accuracy')
@@ -90,18 +115,16 @@ class Binary_Classification:
     def inference(self, img):
         """
         Perform inference on a given image tensor and return the prediction result.
+
         Args:
             img: TensorFlow tensor of the image.
+
         Returns:
             str: Prediction result based on the folder names.
         """
-        # Resize and normalize the image
         resize = tf.image.resize(img, (256, 256)) / 255.0
 
-        # Expand dimensions to match the model input
         yhat = self.model.predict(np.expand_dims(resize.numpy(), axis=0))[0][0]
 
-        # Use dynamically retrieved class names
-        predicted_class = self.class_names[int(yhat > 0.5)]  # 0 or 1 -> corresponding class name
+        predicted_class = self.class_names[int(yhat > 0.5)]
         return predicted_class
-

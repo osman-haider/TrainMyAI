@@ -3,6 +3,20 @@ import os
 import shutil
 
 def sidebar_ui(st):
+    """
+    Creates a sidebar UI for the TrainMyAI application to facilitate model selection, parameter input,
+    and file upload for processing.
+
+    Parameters:
+    - st: Streamlit object for handling the sidebar UI and session states.
+
+    Returns:
+    - Tuple containing:
+        - search_method: Selected search method (e.g., CNN, ANN).
+        - selected_parent: Selected main model type (e.g., Image Classification).
+        - selected_child: Selected sub-model type, if applicable (e.g., Binary Classification).
+        - input_value: Number of epochs input by the user.
+    """
     with st.sidebar:
         st.title("TrainMyAI")
         st.header("Select your favorite model")
@@ -90,22 +104,19 @@ def sidebar_ui(st):
             elif search_method == "Select Model Type" or selected_parent == "Select an option" or (selected_child is not None and selected_child == "Select an option"):
                 st.error("Please make all required selections in the dropdown menus")
             else:
-                # Reset session state variables for a fresh start
                 st.session_state["process_completed"] = False
                 st.session_state["model_trained"] = False
                 st.session_state["binary_cl"] = None
 
-                # Check if the `extracted_folder` exists
                 extracted_folder_path = "extracted_folder"
                 if os.path.exists(extracted_folder_path) and os.path.isdir(extracted_folder_path):
-                    # Delete all contents of the folder
                     for filename in os.listdir(extracted_folder_path):
                         file_path = os.path.join(extracted_folder_path, filename)
                         try:
                             if os.path.isfile(file_path) or os.path.islink(file_path):
-                                os.unlink(file_path)  # Remove file or symbolic link
+                                os.unlink(file_path)
                             elif os.path.isdir(file_path):
-                                shutil.rmtree(file_path)  # Remove directory
+                                shutil.rmtree(file_path)
                         except Exception as e:
                             st.error(f"Failed to delete {file_path}. Reason: {e}")
 

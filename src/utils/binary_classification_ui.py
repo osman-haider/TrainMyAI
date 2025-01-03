@@ -4,15 +4,24 @@ import json
 from src.utils import traning_log
 
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+
 def binary_classification_cofig(st, input_value):
+    """
+    This function configures and trains a binary classification model using the specified input parameters.
+
+    Parameters:
+    - st: The Streamlit session object for handling session states and UI updates.
+    - input_value: The number of epochs for training the model.
+
+    Returns:
+    - None. The function updates the Streamlit session state with the trained model and training logs.
+    """
     binary_cl = binary_classification_model_creation.Binary_Classification()
 
-    # Check if the model is already trained
     if not st.session_state["model_trained"]:
-
-        # Use placeholders for temporary messages
         preprocess_placeholder = st.empty()
         split_placeholder = st.empty()
         compile_placeholder = st.empty()
@@ -30,17 +39,14 @@ def binary_classification_cofig(st, input_value):
         st.write("Training the model...")
         history = binary_cl.train_model(epochs=input_value)
 
-        # Clear temporary messages after training
         preprocess_placeholder.empty()
         split_placeholder.empty()
         compile_placeholder.empty()
         train_placeholder.empty()
 
-        # Save the model to session state
         st.session_state["binary_cl"] = binary_cl
         st.session_state["model_trained"] = True
 
-        # Extract metrics from the history object
         training_logs = []
         for epoch in range(len(history.history['loss'])):
             log = {
@@ -55,12 +61,10 @@ def binary_classification_cofig(st, input_value):
 
         st.session_state["training_logs"] = json.dumps(training_logs, indent=6)
 
-    # Use the trained model from session state
     binary_cl = st.session_state["binary_cl"]
 
     traning_log.logs(st)
 
-    # Display training metrics
     st.subheader("Training Metrics")
     col1, col2 = st.columns(2)
 
@@ -69,24 +73,20 @@ def binary_classification_cofig(st, input_value):
     with col2:
         st.pyplot(binary_cl.plot_accuracy())
 
-    # Provide an option to download the trained model
     st.subheader("Download Trained Model")
     download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
 
     if download_option == "Yes":
-        # Save the model to a buffer as .h5
         import io
         import h5py
 
         model_buffer = io.BytesIO()
 
-        # Save the model to the buffer using h5py
         with h5py.File(model_buffer, 'w') as f:
             binary_cl.model.save(f)
 
-        model_buffer.seek(0)  # Reset the buffer pointer
+        model_buffer.seek(0)
 
-        # Provide a download button dynamically
         st.download_button(
             label="Download Model as .h5",
             data=model_buffer,
@@ -94,26 +94,19 @@ def binary_classification_cofig(st, input_value):
             mime="application/octet-stream"
         )
 
-    # Add "Inference" section
     st.subheader("Inference")
     st.write("Upload an image for inference:")
 
-    # Image uploader
     uploaded_image = st.file_uploader("Choose an image", type=["jpeg", "jpg", "png", "bmp"], key="image_uploader")
 
-    # Submit button for inference
     inference_button = st.button("Submit for Inference", key="inference_button")
 
     if inference_button and uploaded_image is not None:
-        # Read the uploaded image file
-        img_bytes = uploaded_image.read()  # Get the binary content
-        img_array = tf.image.decode_image(img_bytes, channels=3)  # Decode to tensor
-        result = binary_cl.inference(img_array)  # Pass the tensor to the inference function
+        img_bytes = uploaded_image.read()
+        img_array = tf.image.decode_image(img_bytes, channels=3)
+        result = binary_cl.inference(img_array)
 
-        # Display the result in large, bold text
         st.markdown(f"<h2 style='text-align: center; color: black;'>Prediction: {result.upper()}</h2>",
                     unsafe_allow_html=True)
 
-        # Display the uploaded image
         st.image(uploaded_image, caption="Uploaded Image for Inference", use_container_width=True)
-

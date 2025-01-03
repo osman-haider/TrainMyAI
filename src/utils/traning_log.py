@@ -1,5 +1,13 @@
 def logs(st):
-    # Display training logs
+    """
+    Displays training logs in a scrollable JSON-like format on the Streamlit app.
+
+    Parameters:
+    - st: Streamlit object for rendering the UI elements.
+
+    Returns:
+    - None. Outputs the training logs directly to the Streamlit interface.
+    """
     st.subheader("Training Logs")
     st.markdown(
         """
