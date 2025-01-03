@@ -13,7 +13,7 @@ TrainMyAI is a user-friendly tool designed to enable anyone to train deep learni
 
 ### Prerequisites
 Make sure you have the following installed:
-- Python 3.7 or above
+- Python 3.9 or above
 - pip (Python package installer)
 
 ### Installation
