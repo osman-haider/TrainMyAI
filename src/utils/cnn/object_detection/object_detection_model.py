@@ -10,6 +10,7 @@ import skimage
 from skimage import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from PIL import Image
+import xml.etree.ElementTree as ET
 
 class object_detection:
     """
@@ -21,7 +22,11 @@ class object_detection:
         """
         Initializes the object_detection class with default parameters and configurations.
         """
-        self.DIR_ANNOTATIONS = "extracted_folder/dataset.csv"
+        self.DIR_ANNOTATIONS = "extracted_folder"
+        self.DIR_XML = os.path.join(self.DIR_ANNOTATIONS, "annotations")
+        self.csv_flag = False
+        self.xml_flag = False
+        self.required_files = []
         self.DIR_IMAGES = "extracted_folder/images"
         self.model = None
         self.history = None
@@ -39,6 +44,66 @@ class object_detection:
         self.COMPILE_LOSS = tf.keras.losses.MeanSquaredError()
         self.COMPILE_METRICS = ['accuracy']
         self.FIT_EPOCHS = 100
+
+    def load_xml_annotations(self, directory, fn_parse_annotation):
+        """
+        Loads XML annotations from a given directory and parses them using a specified function.
+
+        Args:
+            directory (str): Path to the directory containing XML files.
+            fn_parse_annotation (function): Function to parse the annotations.
+
+        Returns:
+            list: Parsed annotations.
+        """
+        annotations = []
+        for filename in os.listdir(directory):
+            if filename.endswith('.xml'):
+                file_path = os.path.join(directory, filename)
+                tree = ET.parse(file_path)
+                annotation_item = fn_parse_annotation(tree.getroot())
+                annotations.append(annotation_item)
+        return annotations
+
+    def parse_annotation(self, root):
+        """
+        Parses a single XML annotation file into a dictionary format.
+
+        Args:
+            root (xml.etree.ElementTree.Element): Root element of the XML tree.
+
+        Returns:
+            dict: Parsed annotation data.
+        """
+        annotation = {}
+        annotation['filename'] = f'{self.DIR_ANNOTATIONS}/{root.find("filename").text}'
+        annotation['xmin'] = int(root.find('object/bndbox/xmin').text)
+        annotation['ymin'] = int(root.find('object/bndbox/ymin').text)
+        annotation['xmax'] = int(root.find('object/bndbox/xmax').text)
+        annotation['ymax'] = int(root.find('object/bndbox/ymax').text)
+        return annotation
+
+    def detect_files(self):
+        """
+        Detects .csv files in the base folder and .xml files in the annotation folder.
+        Sets flags based on the file type found.
+        """
+        for root, _, files in os.walk(self.DIR_ANNOTATIONS):
+            for file in files:
+                if file.endswith('.csv'):
+                    file_path = os.path.join(root, file)
+                    self.required_files.append(file_path)
+                    self.csv_flag = True
+                    break
+
+        if os.path.exists(self.DIR_XML):
+            for root, _, files in os.walk(self.DIR_XML):
+                for file in files:
+                    if file.endswith('.xml'):
+                        file_path = os.path.join(root, file)
+                        self.required_files.append(file_path)
+                        self.xml_flag = True
+                        break
 
     def load_normalize_image(self, image_path, img_size, channels=1):
         """
@@ -78,10 +143,22 @@ class object_detection:
         Preprocesses the dataset by reading the annotations, renaming columns, normalizing
         bounding box coordinates, and splitting the dataset into training and validation sets.
         """
-        dataframe_original = pd.read_csv(self.DIR_ANNOTATIONS)
-        dataframe_original['image'] = dataframe_original['image'].apply(lambda x: os.path.join(self.DIR_IMAGES, x))
+        self.detect_files()
+        dataframe_original = None
+        if self.csv_flag:
+            dataframe_original = pd.read_csv(self.required_files[0])
+        elif self.xml_flag:
+            annotations = self.load_xml_annotations(self.DIR_XML, self.parse_annotation)
+            dataframe_original = pd.DataFrame(annotations)
 
-        dataframe_original = dataframe_original.rename(columns={'image': 'filename'})
+        if self.xml_flag:
+            dataframe_original['filename'] = dataframe_original['filename'].apply(
+                lambda x: x if os.path.isabs(x) else os.path.join(self.DIR_IMAGES, os.path.basename(x))
+            )
+        else:
+            dataframe_original['filename'] = dataframe_original['filename'].apply(
+                lambda x: os.path.join(self.DIR_IMAGES, x)
+            )
 
         dataframe_preprocessed = dataframe_original.copy()
         dataframe_preprocessed[["xmin", "ymin", "xmax", "ymax"]] /= self.SIZE
@@ -118,7 +195,7 @@ class object_detection:
             list: List of TensorFlow callbacks.
         """
         FIT_CALLBACKS = [tf.keras.callbacks.EarlyStopping(monitor='val_loss',
-                                                          patience=25,
+                                                          patience=8,
                                                           min_delta=0.001,
                                                           restore_best_weights=True,
                                                           verbose=1)]
