@@ -1,6 +1,5 @@
-from src.utils.cnn.image_classification import plots
+from src.utils.cnn import plots
 from src.utils.cnn.object_detection import object_detection_model
-import tensorflow as tf
 import json
 from src.utils import traning_log
 import os
@@ -12,7 +11,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def object_detection_cofig(st, input_value):
     """
-    This function configures and trains a binary classification model using the specified input parameters.
+    This function configures and trains a object detection model using the specified input parameters.
 
     Parameters:
     - st: The Streamlit session object for handling session states and UI updates.
@@ -84,7 +83,6 @@ def object_detection_cofig(st, input_value):
 
     if download_option == "Yes":
         import io
-        import h5py
 
         model_buffer = io.BytesIO()
 
@@ -124,11 +122,9 @@ def object_detection_cofig(st, input_value):
 
         col1, col2 = st.columns(2)
 
-
         with col1:
             st.markdown("<div style='height:57px;'></div>", unsafe_allow_html=True)  # Add 30px vertical space
             st.image(uploaded_image, caption="Uploaded Image", width=300)
 
         with col2:
             st.image(img_with_bbox, caption="Inference Result", width=300)  # Same fixed width
-

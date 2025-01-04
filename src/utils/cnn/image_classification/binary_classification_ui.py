@@ -1,4 +1,5 @@
-from src.utils.cnn.image_classification import multiclass_classification_model, plots
+from src.utils.cnn.image_classification import binary_classification_model_creation
+from src.utils.cnn import plots
 import tensorflow as tf
 import json
 from src.utils import traning_log
@@ -8,7 +9,7 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-def multiclass_classification_cofig(st, input_value):
+def binary_classification_cofig(st, input_value):
     """
     This function configures and trains a binary classification model using the specified input parameters.
 
@@ -19,7 +20,7 @@ def multiclass_classification_cofig(st, input_value):
     Returns:
     - None. The function updates the Streamlit session state with the trained model and training logs.
     """
-    multiclass_cl = multiclass_classification_model.multiclass_classifiction()
+    binary_cl = binary_classification_model_creation.Binary_Classification()
 
     if not st.session_state["model_trained"]:
         preprocess_placeholder = st.empty()
@@ -27,30 +28,31 @@ def multiclass_classification_cofig(st, input_value):
         compile_placeholder = st.empty()
         train_placeholder = st.empty()
 
-        st.write("train dataset in creating...")
-        multiclass_cl.train_data_generator()
+        st.write("Preprocessing the dataset...")
+        binary_cl.dataset_preprocessing()
 
-        st.write("val dataset in creating...")
-        multiclass_cl.val_data_generator()
+        st.write("Splitting the dataset...")
+        binary_cl.splitting_dataset()
 
-        st.write("Creating the model...")
-        multiclass_cl.cnn_model_buliding()
+        st.write("Creating and compiling the model...")
+        binary_cl.model_creation()
 
         st.write("Training the model...")
-        history = multiclass_cl.model_fit(epochs=input_value)
+        history = binary_cl.train_model(epochs=input_value)
 
         preprocess_placeholder.empty()
         split_placeholder.empty()
         compile_placeholder.empty()
         train_placeholder.empty()
 
-        st.session_state["model_obj"] = multiclass_cl
+        st.session_state["model_obj"] = binary_cl
         st.session_state["model_trained"] = True
 
         training_logs = []
         for epoch in range(len(history.history['loss'])):
             log = {
                 "epoch": epoch + 1,
+                "steps": len(binary_cl.train),
                 "loss": history.history['loss'][epoch],
                 "accuracy": history.history['accuracy'][epoch],
                 "val_loss": history.history['val_loss'][epoch],
@@ -60,13 +62,13 @@ def multiclass_classification_cofig(st, input_value):
 
         st.session_state["training_logs"] = json.dumps(training_logs, indent=6)
 
-    multiclass_cl = st.session_state["model_obj"]
+    binary_cl = st.session_state["model_obj"]
 
     traning_log.logs(st)
 
     st.subheader("Training Metrics")
     col1, col2 = st.columns(2)
-    plot = plots.training_metrics(multiclass_cl.history)
+    plot = plots.training_metrics(binary_cl.history)
     with col1:
         st.pyplot(plot.plot_loss())
     with col2:
@@ -82,7 +84,7 @@ def multiclass_classification_cofig(st, input_value):
         model_buffer = io.BytesIO()
 
         with h5py.File(model_buffer, 'w') as f:
-            multiclass_cl.model.save(f)
+            binary_cl.model.save(f)
 
         model_buffer.seek(0)
 
@@ -102,9 +104,8 @@ def multiclass_classification_cofig(st, input_value):
 
     if inference_button and uploaded_image is not None:
         img_bytes = uploaded_image.read()
-        img_tensor = tf.image.decode_image(img_bytes, channels=3)  # Decode the image to a tensor
-        result = multiclass_cl.inference(img_tensor)
-        st.write(f"Predicted class: {result}")
+        img_array = tf.image.decode_image(img_bytes, channels=3)
+        result = binary_cl.inference(img_array)
 
         st.markdown(f"<h2 style='text-align: center; color: black;'>Prediction: {result.upper()}</h2>",
                     unsafe_allow_html=True)

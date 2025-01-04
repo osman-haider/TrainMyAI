@@ -1,4 +1,4 @@
-from src.utils import binary_classification_ui, multiclass_classfication_ui
+from src.utils.cnn.image_classification import binary_classification_ui, multiclass_classfication_ui
 from src.utils.cnn.object_detection import object_detection_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):

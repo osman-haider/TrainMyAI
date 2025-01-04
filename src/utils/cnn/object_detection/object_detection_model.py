@@ -1,10 +1,6 @@
 import os
-import random
-import xml.etree.ElementTree as ET
-import csv
 import numpy as np
 import tensorflow as tf
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import pandas as pd
@@ -13,13 +9,18 @@ from sklearn.model_selection import train_test_split
 import skimage
 from skimage import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
 from PIL import Image
 
-
 class object_detection:
+    """
+    Class for object detection tasks including dataset preprocessing, model creation,
+    training, and inference.
+    """
 
     def __init__(self):
+        """
+        Initializes the object_detection class with default parameters and configurations.
+        """
         self.DIR_ANNOTATIONS = "extracted_folder/dataset.csv"
         self.DIR_IMAGES = "extracted_folder/images"
         self.model = None
@@ -39,8 +40,18 @@ class object_detection:
         self.COMPILE_METRICS = ['accuracy']
         self.FIT_EPOCHS = 100
 
-
     def load_normalize_image(self, image_path, img_size, channels=1):
+        """
+        Loads and normalizes an image given its path and target size.
+
+        Args:
+            image_path (str): Path to the image file.
+            img_size (tuple): Target size for resizing the image.
+            channels (int): Number of channels to decode the image.
+
+        Returns:
+            tf.Tensor: Normalized image tensor.
+        """
         image = tf.io.read_file(image_path)
         image = tf.image.decode_jpeg(image, channels=channels)
         image = tf.cast(image, tf.float64)
@@ -49,11 +60,24 @@ class object_detection:
         return image
 
     def create_dataset_from_dataframe(self, dataframe):
+        """
+        Creates a TensorFlow dataset from a Pandas DataFrame.
+
+        Args:
+            dataframe (pd.DataFrame): DataFrame containing image paths and bounding box coordinates.
+
+        Returns:
+            tf.data.Dataset: TensorFlow dataset with image paths and coordinates.
+        """
         image_paths = tf.cast(dataframe.iloc[:]['filename'].values, tf.string)
         image_coordinates = tf.cast(dataframe[['xmin', 'ymin', 'xmax', 'ymax']].values, tf.float64)
         return tf.data.Dataset.from_tensor_slices(tensors=(image_paths, image_coordinates))
 
     def preprocess_dataset(self):
+        """
+        Preprocesses the dataset by reading the annotations, renaming columns, normalizing
+        bounding box coordinates, and splitting the dataset into training and validation sets.
+        """
         dataframe_original = pd.read_csv(self.DIR_ANNOTATIONS)
         dataframe_original['image'] = dataframe_original['image'].apply(lambda x: os.path.join(self.DIR_IMAGES, x))
 
@@ -62,11 +86,12 @@ class object_detection:
         dataframe_preprocessed = dataframe_original.copy()
         dataframe_preprocessed[["xmin", "ymin", "xmax", "ymax"]] /= self.SIZE
 
-        # Split the DataFrame into training(80%) and validation(20%)
         self.train_dataframe, self.val_dataframe = train_test_split(dataframe_preprocessed, test_size=0.2)
 
     def train_dataset_method(self):
-        # Train Dataset
+        """
+        Prepares the training dataset by mapping, shuffling, caching, batching, and prefetching.
+        """
         train_dataset = self.create_dataset_from_dataframe(self.train_dataframe)
         map_func = lambda image_path, data: (self.load_normalize_image(image_path, [224, 224]), data)
         train_dataset = train_dataset.map(map_func=map_func, num_parallel_calls=tf.data.AUTOTUNE)
@@ -75,7 +100,9 @@ class object_detection:
         self.train_steps = max(1, len(self.train_dataframe) // self.BATCH_SIZE)
 
     def val_dataset_method(self):
-        # Test Dataset
+        """
+        Prepares the validation dataset by mapping, shuffling, caching, batching, and prefetching.
+        """
         val_dataset = self.create_dataset_from_dataframe(self.val_dataframe)
         map_func = lambda image_path, data: (self.load_normalize_image(image_path, [224, 224]), data)
         val_dataset = val_dataset.map(map_func=map_func, num_parallel_calls=tf.data.AUTOTUNE)
@@ -84,6 +111,12 @@ class object_detection:
         self.val_steps = max(1, len(self.val_dataframe) // self.BATCH_SIZE)
 
     def call_back(self):
+        """
+        Configures and returns training callbacks for early stopping.
+
+        Returns:
+            list: List of TensorFlow callbacks.
+        """
         FIT_CALLBACKS = [tf.keras.callbacks.EarlyStopping(monitor='val_loss',
                                                           patience=25,
                                                           min_delta=0.001,
@@ -92,7 +125,9 @@ class object_detection:
         return FIT_CALLBACKS
 
     def model_creation(self):
-        # Model creation
+        """
+        Creates and compiles the object detection model with convolutional and dense layers.
+        """
         inputs = tf.keras.Input(shape=self.INPUT_SHAPE, name='input_layer')
         x = tf.keras.layers.Conv2D(8, 3, padding='same', activation=tf.keras.activations.relu, name='conv_layer1')(
             inputs)
@@ -104,19 +139,22 @@ class object_detection:
         x = tf.keras.layers.Flatten(name='flatten_layer')(x)
         x = tf.keras.layers.Dense(512, activation=tf.keras.activations.relu, name='dense_layer1')(x)
         x = tf.keras.layers.Dense(32, activation=tf.keras.activations.relu, name='dense_layer2')(x)
-        # The last 4 units correspond to the coordinates and size (xmin,ymin,xmax,ymax)
         outputs = tf.keras.layers.Dense(units=4, activation='linear', name='output_layer')(x)
         self.model = tf.keras.Model(inputs=inputs, outputs=outputs, name='object_detection')
 
-        # Compilation of the final model
         self.model.compile(
             optimizer=self.COMPILE_OPTIMIZER,
             loss=self.COMPILE_LOSS,
             metrics=self.COMPILE_METRICS)
 
     def train_model(self, FIT_EPOCHS):
+        """
+        Trains the model using the prepared training and validation datasets.
+
+        Args:
+            FIT_EPOCHS (int): Number of epochs for training.
+        """
         FIT_CALLBACKS = self.call_back()
-        # Model training
         self.history = self.model.fit(
             self.train_dataset,
             steps_per_epoch=self.train_steps,
@@ -139,17 +177,10 @@ class object_detection:
         Returns:
             The plotted figure.
         """
-        # Scale prediction to original image size
         predicted = prediction * img_size
-
-        # Load the image
         image = io.imread(image_path)
-
-        # Create plot
         fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         ax.imshow(image)
-
-        # Draw predicted bounding box
         predicted_width = predicted[2] - predicted[0]
         predicted_height = predicted[3] - predicted[1]
         ax.add_patch(patches.Rectangle(
@@ -175,27 +206,20 @@ class object_detection:
         Returns:
             io.BytesIO: In-memory file containing the image with the predicted bounding box.
         """
-        # Preprocess and predict
         image = self.load_normalize_image(image_path, [224, 224])
         expanded_image = tf.expand_dims(image, 0)
         prediction = self.model.predict(expanded_image)
-
         prediction = np.squeeze(prediction)
-
-        # Plot and save the figure
         fig = self.plot_predictions(
             prediction=prediction,
             image_path=image_path,
             img_size=224,
             box_color='lime'
         )
-
         import io
-        # Convert the matplotlib figure to a PIL Image
         canvas = FigureCanvas(fig)
         buffer = io.BytesIO()
         canvas.print_png(buffer)
         buffer.seek(0)
         image = Image.open(buffer)
-
         return image
