@@ -1,4 +1,5 @@
 from src.utils import binary_classification_ui, multiclass_classfication_ui
+from src.utils.cnn.object_detection import object_detection_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -22,7 +23,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
             elif selected_child == "Multi Class Classification":
                 multiclass_classfication_ui.multiclass_classification_cofig(st, input_value)
         elif selected_parent == "Object Detection":
-            st.info("CNN ---> Object Detection")
+            object_detection_ui.object_detection_cofig(st, input_value)
         elif selected_parent == "Image Segmentation":
             st.info("CNN ---> Image Segmentation")
         elif selected_parent == "Face Recognition":
