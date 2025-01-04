@@ -13,7 +13,7 @@ TrainMyAI is a user-friendly tool designed to enable anyone to train deep learni
 
 ### Prerequisites
 Make sure you have the following installed:
-- Python 3.9 or above
+- Python 3.7 or above
 - pip (Python package installer)
 
 ### Installation
@@ -81,15 +81,34 @@ Provide your dataset as a zip file with the following structure:
     cat/
     dog/
     ```
+
 - For Multiclass Classification:
   - Zip the folders directly without nesting them under a parent folder. For example:
-  ```
-   class_A/
-   class_B/
-   class_C/
-   class_D/
-   ```
+    ```
+    class_A/
+    class_B/
+    class_C/
+    class_D/
+    ```
 
+- For Object Detection:
+  - You must have an `.xml` file or `.csv` file. If you have a `.csv` file, it must be in the root directory along with a second directory named `images`.
+  - If you have `.xml` files, the root directory should contain two directories: `images` and `annotations` (where all `.xml` files are stored).
+  - Ensure your `.xml` or `.csv` file includes the following columns: `filename` (stores the filenames present in your `images` directory), `xmin`, `ymin`, `xmax`, `ymax`.
+  - The dataset must be provided in a `.zip` file.
+  - CSV file. For example:
+    ```
+    images/
+      img1.jpg
+    {datasetname}.csv
+    ```
+  - XML. For example:
+    ```
+    images/
+      img1.jpg
+    annotations/
+      img1.xml
+    ```
 ## Project Status
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
