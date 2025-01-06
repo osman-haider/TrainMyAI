@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def face_recognition_cofig(st, input_value):
     """
-    This function configures and trains a multiclass classification model using the specified input parameters.
+    This function configures and trains a face recognition model using the specified input parameters.
 
     Parameters:
     - st: The Streamlit session object for handling session states and UI updates.
