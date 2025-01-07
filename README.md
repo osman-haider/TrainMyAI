@@ -109,6 +109,14 @@ Provide your dataset as a zip file with the following structure:
     annotations/
       img1.xml
     ```
+- For Style Transformer
+  - Zip the folders directly without nesting them under a parent folder. For example:
+  ```
+    ContentImages/
+      img1.jpg
+    StyleImages/
+      img1.jpg
+    ```
 ## Project Status
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
