@@ -8,17 +8,18 @@ from pathlib import Path
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
+"""
+This function handles the configuration and training of the style transformer model, as well as
+performing inference and allowing users to download the trained model. It includes uploading
+content and style images, preprocessing data, training the model, and generating stylized images.
+"""
 def style_transfor_cofig(st, input_value):
     """
-    This function configures and trains a object detection model using the specified input parameters.
+    Configure and train the style transformer model.
 
     Parameters:
-    - st: The Streamlit session object for handling session states and UI updates.
-    - input_value: The number of epochs for training the model.
-
-    Returns:
-    - None. The function updates the Streamlit session state with the trained model and training logs.
+    - st: Streamlit session object for UI updates.
+    - input_value: Number of epochs for training.
     """
     style_transfor_cl = style_transfor_model.StyleTransformer()
 
@@ -28,9 +29,15 @@ def style_transfor_cofig(st, input_value):
         compile_placeholder = st.empty()
         train_placeholder = st.empty()
 
+        """
+        Preprocess the dataset and prepare content and style images for training.
+        """
         st.write("data preprocessing...")
         content_images, style_images = style_transfor_cl.prepare_dataset()
 
+        """
+        Train the model with the specified number of epochs.
+        """
         st.write("Training the model...")
         style_transfor_cl.train(input_value)
 
@@ -39,6 +46,9 @@ def style_transfor_cofig(st, input_value):
         compile_placeholder.empty()
         train_placeholder.empty()
 
+        """
+        Save the trained model and log training metrics.
+        """
         st.session_state["model_obj"] = style_transfor_cl
         st.session_state["model_trained"] = True
 
@@ -55,6 +65,9 @@ def style_transfor_cofig(st, input_value):
 
     style_transfor_cl = st.session_state["model_obj"]
 
+    """
+    Display training logs and metrics.
+    """
     traning_log.logs(st)
 
     st.subheader("Training Metrics")
@@ -62,6 +75,9 @@ def style_transfor_cofig(st, input_value):
     plot = style_transfor_cl.plot_losses()
     st.pyplot(plot)
 
+    """
+    Allow the user to download the trained model in HDF5 format.
+    """
     st.subheader("Download Trained Model")
     download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
 
@@ -70,7 +86,6 @@ def style_transfor_cofig(st, input_value):
 
         model_buffer = io.BytesIO()
 
-        # Save the model to the buffer in HDF5 format
         style_transfor_cl.model.save('model.h5')
 
         model_buffer.seek(0)
@@ -82,37 +97,35 @@ def style_transfor_cofig(st, input_value):
             mime="application/octet-stream"
         )
 
-    # Inference Section
+    """
+    Inference Section: Allow users to upload content and style images for generating stylized images.
+    """
     st.subheader("Style Transfer Inference")
     st.write("Upload a content image and a style image:")
 
-    # File uploaders for content and style images
     content_uploaded_image = st.file_uploader("Choose a Content Image", type=["jpeg", "jpg", "png"],
                                               key="content_uploader")
     style_uploaded_image = st.file_uploader("Choose a Style Image", type=["jpeg", "jpg", "png"], key="style_uploader")
 
-    # Button to trigger the inference process
     inference_button = st.button("Submit for Inference", key="inference_button")
 
     if inference_button and content_uploaded_image and style_uploaded_image:
-        # Directories to save the uploaded images
+        """
+        Save uploaded images to respective directories and perform style transfer.
+        """
         content_img_dir = "extracted_folder/Inference_Content"
         style_img_dir = "extracted_folder/Inference_Style"
-        Path(content_img_dir).mkdir(parents=True, exist_ok=True)  # Create the content folder if it doesn't exist
-        Path(style_img_dir).mkdir(parents=True, exist_ok=True)  # Create the style folder if it doesn't exist
+        Path(content_img_dir).mkdir(parents=True, exist_ok=True)
+        Path(style_img_dir).mkdir(parents=True, exist_ok=True)
 
-        # Save the uploaded content image
         content_img_path = os.path.join(content_img_dir, content_uploaded_image.name)
         with open(content_img_path, "wb") as f:
             f.write(content_uploaded_image.getbuffer())
 
-        # Save the uploaded style image
         style_img_path = os.path.join(style_img_dir, style_uploaded_image.name)
         with open(style_img_path, "wb") as f:
             f.write(style_uploaded_image.getbuffer())
 
-        # Perform style transfer
         stylized_image_fig = style_transfor_cl.stylize_image(content_img_path, style_img_path)
 
-        # Display the resulting stylized image
         st.pyplot(stylized_image_fig)
