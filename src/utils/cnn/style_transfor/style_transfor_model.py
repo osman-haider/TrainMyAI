@@ -1,16 +1,16 @@
 import os
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras.applications import VGG19
-from tensorflow.keras.models import Model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from tensorflow.keras.optimizers import Adam
+from tf_keras.applications import VGG19
+from tf_keras.models import Model
+from tf_keras.preprocessing.image import load_img, img_to_array
+from tf_keras.optimizers import Adam
 import matplotlib.pyplot as plt
 
 class StyleTransformer:
-    def __init__(self, content_dir, style_dir, target_size=(256, 256), learning_rate=0.001, alpha=1.0, beta=1.0):
-        self.content_dir = content_dir
-        self.style_dir = style_dir
+    def __init__(self, target_size=(256, 256), learning_rate=0.001, alpha=1.0, beta=1.0):
+        self.content_dir = "extracted_folder/ContentImages/"
+        self.style_dir = "extracted_folder/StyleImages/"
         self.target_size = target_size
         self.learning_rate = learning_rate
         self.alpha = alpha

@@ -1,6 +1,7 @@
 from src.utils.cnn.image_classification import binary_classification_ui, multiclass_classfication_ui
 from src.utils.cnn.object_detection import object_detection_ui
 from src.utils.cnn.face_recognition import face_recognition_ui
+from src.utils.cnn.style_transfor import style_transfor_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -30,6 +31,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
         elif selected_parent == "Face Recognition":
             face_recognition_ui.face_recognition_cofig(st, input_value)
         elif selected_parent == "Style Transfer":
+            style_transfor_ui.style_transfor_cofig(st, input_value)
             st.info("CNN ---> Style Transfer")
 
     elif search_method == "ANN":
