@@ -2,6 +2,7 @@ from src.utils.cnn.image_classification import binary_classification_ui, multicl
 from src.utils.cnn.object_detection import object_detection_ui
 from src.utils.cnn.face_recognition import face_recognition_ui
 from src.utils.cnn.style_transfor import style_transfor_ui
+from src.utils.ann.dataset_prediction import dataset_prediction_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -36,7 +37,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
 
     elif search_method == "ANN":
         if selected_parent == "Dataset Prediction":
-            st.info("ANN ---> Dataset Prediction")
+            dataset_prediction_ui.dataset_prediction_cofig(st, input_value)
         elif selected_parent == "Credit Card Fraud Detection":
             st.info("ANN ---> Credit Card Fraud Detection")
 
