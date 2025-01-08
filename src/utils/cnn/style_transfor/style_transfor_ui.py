@@ -86,7 +86,7 @@ def style_transfor_cofig(st, input_value):
 
         model_buffer = io.BytesIO()
 
-        style_transfor_cl.model.save('model.h5')
+        style_transfor_cl.transformer.save('model.h5')
 
         model_buffer.seek(0)
 
