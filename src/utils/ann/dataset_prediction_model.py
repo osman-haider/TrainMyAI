@@ -10,11 +10,14 @@ from tf_keras.layers import Dense
 import json
 import io
 from PIL import Image
+import os
 
 
 class DatasetPrediction:
-    def __init__(self, file_path):
-        self.data = pd.read_csv(file_path)
+    def __init__(self):
+        self.folder_path = "extracted_folder"
+        self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.csv')][0]
+        self.data = pd.read_csv(os.path.join(self.folder_path, self.file_name))
         self.scaler = MinMaxScaler()
         self.model = None
         self.history = None
