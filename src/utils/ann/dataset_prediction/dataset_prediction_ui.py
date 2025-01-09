@@ -3,14 +3,18 @@ from src.utils.cnn import plots
 import tensorflow as tf
 import json
 from src.utils import traning_log
-
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def dataset_prediction_cofig(st, input_value):
-    # Initialize session state keys
+    """
+    Configures the dataset prediction process, including data preprocessing, model training,
+    evaluation, and inference. It also handles session state management and user interactions
+    for training and downloading the model.
+    """
+
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
     if "model_obj" not in st.session_state:
@@ -29,20 +33,15 @@ def dataset_prediction_cofig(st, input_value):
         st.write("Dataset Reading...")
         data_head = dataset_prediction_cl.get_data_head()
 
-        # Display the head of the data
         st.write("Data Head:")
         st.dataframe(data_head)
 
-        # Extract column names
         column_names = data_head.columns.tolist()
 
-        # Dropdown for multiple column selection
         drop_columns_name = st.multiselect("Select all columns you want to drop:", column_names)
 
-        # Filter columns for single-column dropdown
         filtered_columns = [col for col in column_names if col not in drop_columns_name]
 
-        # Dropdown for single column selection
         output_column = st.selectbox(
             "Select column you want to make a prediction on it",
             options=["Select a column"] + filtered_columns
@@ -83,6 +82,11 @@ def dataset_prediction_cofig(st, input_value):
     dataset_prediction_cl = st.session_state["model_obj"]
 
     if dataset_prediction_cl:
+        """
+        Displays training logs, evaluation metrics, and plots. It also provides an option 
+        to download the trained model and perform inference on the dataset.
+        """
+
         st.write("Training Logs")
         traning_log.logs(st)
 
