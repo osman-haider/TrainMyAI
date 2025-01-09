@@ -10,16 +10,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def dataset_prediction_cofig(st, input_value):
-    """
-    This function configures and trains a face recognition model using the specified input parameters.
-
-    Parameters:
-    - st: The Streamlit session object for handling session states and UI updates.
-    - input_value: The number of epochs for training the model.
-
-    Returns:
-    - None. The function updates the Streamlit session state with the trained model and training logs.
-    """
     # Initialize session state keys
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
@@ -92,43 +82,44 @@ def dataset_prediction_cofig(st, input_value):
 
     dataset_prediction_cl = st.session_state["model_obj"]
 
-    st.write("Training Logs")
-    traning_log.logs(st)
+    if dataset_prediction_cl:
+        st.write("Training Logs")
+        traning_log.logs(st)
 
-    evaluate_model_matrics = dataset_prediction_cl.evaluate_model()
+        evaluate_model_matrics = dataset_prediction_cl.evaluate_model()
 
-    st.subheader("Evaluation Metrics Training Logs")
-    st.session_state["training_logs"] = evaluate_model_matrics
-    traning_log.logs(st)
+        st.subheader("Evaluation Metrics Training Logs")
+        st.session_state["training_logs"] = evaluate_model_matrics
+        traning_log.logs(st)
 
-    st.subheader("Training Metrics")
-    image = dataset_prediction_cl.plot_training_loss()
+        st.subheader("Training Metrics")
+        image = dataset_prediction_cl.plot_training_loss()
 
-    st.image(image, caption="Training Loss Per Epoch", use_container_width=True)
+        st.image(image, caption="Training Loss Per Epoch", use_container_width=True)
 
-    st.subheader("Download Trained Model")
-    download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
+        st.subheader("Download Trained Model")
+        download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
 
-    if download_option == "Yes":
-        import io
-        import h5py
+        if download_option == "Yes":
+            import io
+            import h5py
 
-        model_buffer = io.BytesIO()
+            model_buffer = io.BytesIO()
 
-        with h5py.File(model_buffer, 'w') as f:
-            dataset_prediction_cl.model.save(f)
+            with h5py.File(model_buffer, 'w') as f:
+                dataset_prediction_cl.model.save(f)
 
-        model_buffer.seek(0)
+            model_buffer.seek(0)
 
-        st.download_button(
-            label="Download Model as .h5",
-            data=model_buffer,
-            file_name="trained_model.h5",
-            mime="application/octet-stream"
-        )
+            st.download_button(
+                label="Download Model as .h5",
+                data=model_buffer,
+                file_name="trained_model.h5",
+                mime="application/octet-stream"
+            )
 
-    st.subheader("Inference")
-    inference_button = st.button("Inference", key="inference_button")
-    if inference_button:
-        predicted_dataset = dataset_prediction_cl.prediction()
-        st.dataframe(predicted_dataset)
+        st.subheader("Inference")
+        inference_button = st.button("Inference", key="inference_button")
+        if inference_button:
+            predicted_dataset = dataset_prediction_cl.prediction()
+            st.dataframe(predicted_dataset)

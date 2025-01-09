@@ -42,7 +42,7 @@ class DatasetPrediction:
         for col in self.data.select_dtypes(include=['number']).columns:
             if col != target_column:  # Exclude target column from outlier removal
                 self.remove_outliers(col)
-        self.test_data = self.data.sample(farc=0.05)
+        self.test_data = self.data.sample(frac=0.05)
 
         self.encode_categorical(exclude_columns=[target_column])
 
@@ -163,7 +163,7 @@ class DatasetPrediction:
         # Making predictions
         predictions = self.model.predict(new_data_scaled)
         if self.task_type == 'regression':
-            predictions = predictions.flatten()
+            predictions = np.round(predictions)
         if self.task_type == 'classification':
             # Convert numerical predictions back to original labels
             predictions = self.target_encoder.inverse_transform(np.argmax(predictions, axis=1))
