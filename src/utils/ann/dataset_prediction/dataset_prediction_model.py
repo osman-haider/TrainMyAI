@@ -28,6 +28,7 @@ class DatasetPrediction:
         self.label_mappings = {}
         self.task_type = None
         self.target_encoder = None
+        self.test_data = None
 
     def get_data_head(self):
         return self.data.head()
@@ -41,6 +42,7 @@ class DatasetPrediction:
         for col in self.data.select_dtypes(include=['number']).columns:
             if col != target_column:  # Exclude target column from outlier removal
                 self.remove_outliers(col)
+        self.test_data = self.data.sample(farc=0.05)
 
         self.encode_categorical(exclude_columns=[target_column])
 
@@ -134,28 +136,40 @@ class DatasetPrediction:
         plt.close()
         return Image.open(buf)
 
-    def make_prediction(self, input_data):
-        input_df = pd.DataFrame([input_data], columns=self.X.columns)
+    def prediction(self):
+        # Create a copy of the original dataset to avoid modifying it
+        new_data = self.test_data.copy()
+        testing = self.test_data.copy()
 
-        # Encode categorical columns using stored encoders
-        for col in input_df.select_dtypes(include=['object']).columns:
-            if col in self.encoders:
-                encoder = self.encoders[col]
-                input_df[col] = encoder.transform(input_df[col])
-            else:
-                raise ValueError(f"Unexpected column '{col}' in input data.")
+        # Handle missing values and encode categorical variables as done during training
+        new_data.fillna("UNKNOWN", inplace=True)
 
-        # Scale the input data
-        scaled_input = self.scaler.transform(input_df)
+        # Encoding categorical features
+        for col in self.encoders:
+            encoder = self.encoders[col]
+            # Adjusting encoder to handle unknown categories
+            known_labels = set(encoder.classes_)
+            new_data[col] = new_data[col].apply(lambda x: x if x in known_labels else 'UNKNOWN')
+            # Temporarily extending encoder classes to include 'UNKNOWN' if not already included
+            if 'UNKNOWN' not in encoder.classes_:
+                extended_classes = np.append(encoder.classes_, 'UNKNOWN')
+                encoder.classes_ = extended_classes
+            new_data[col] = encoder.transform(new_data[col])
 
-        # Predict using the model
-        prediction = self.model.predict(scaled_input)
+        # Selecting and scaling the features
+        new_data_features = new_data[self.X.columns]  # Ensure the columns match the training features
+        new_data_scaled = self.scaler.transform(new_data_features)
 
+        # Making predictions
+        predictions = self.model.predict(new_data_scaled)
+        if self.task_type == 'regression':
+            predictions = predictions.flatten()
         if self.task_type == 'classification':
-            # Get the class index
-            class_index = np.argmax(prediction, axis=1)[0]
-            # Map the index back to the original string label
-            original_label = self.target_encoder.inverse_transform([class_index])[0]
-            return original_label
+            # Convert numerical predictions back to original labels
+            predictions = self.target_encoder.inverse_transform(np.argmax(predictions, axis=1))
+        else:
+            predictions = predictions.flatten()
 
-        return prediction[0][0]  # For regression, return the numerical prediction
+        # Append predictions to the new data
+        testing['Predicted Result'] = predictions
+        return testing
