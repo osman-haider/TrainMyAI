@@ -46,13 +46,11 @@ TrainMyAI supports the following deep learning models and tasks:
      - Binary Classification
      - Multi-Class Classification
    - Object Detection
-   - Image Segmentation
    - Face Recognition
    - Style Transfer
 
 2. **Artificial Neural Networks (ANN):**
    - Dataset Prediction
-   - Credit Card Fraud Detection
 
 3. **Recurrent Neural Networks (RNN):**
    - Sentiment Analysis
@@ -117,6 +115,14 @@ Provide your dataset as a zip file with the following structure:
     StyleImages/
       img1.jpg
     ```
+### For ANN Models:
+Provide your dataset as a zip file with the following structure:
+- Dataset Prediction:
+  - Zip the folders directly without nesting them under a parent folder. For example:
+    ```
+    dataset_name.csv
+    ```
+
 ## Project Status
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
