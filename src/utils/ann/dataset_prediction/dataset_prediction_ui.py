@@ -128,18 +128,7 @@ def dataset_prediction_cofig(st, input_value):
         )
 
     st.subheader("Inference")
-    st.write("Upload an image for inference:")
-
-    uploaded_image = st.file_uploader("Choose an image", type=["jpeg", "jpg", "png", "bmp"], key="image_uploader")
-
-    inference_button = st.button("Submit for Inference", key="inference_button")
-
-    if inference_button and uploaded_image is not None:
-        img_bytes = uploaded_image.read()
-        img_tensor = tf.image.decode_image(img_bytes, channels=3)  # Decode the image to a tensor
-        result = dataset_prediction_cl.inference(img_tensor)
-        st.write(f"Predicted class: {result}")
-
-        st.markdown(f"<h2 style='text-align: center; color: black;'>Prediction: {result.upper()}</h2>", unsafe_allow_html=True)
-
-        st.image(uploaded_image, caption="Uploaded Image for Inference", use_container_width=True)
+    inference_button = st.button("Inference", key="inference_button")
+    if inference_button:
+        predicted_dataset = dataset_prediction_cl.prediction()
+        st.dataframe(predicted_dataset)
