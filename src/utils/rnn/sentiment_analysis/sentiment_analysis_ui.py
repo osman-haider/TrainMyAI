@@ -9,11 +9,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def sentiment_analysis_cofig(st, input_value):
-    """
-    Configures the dataset prediction process, including data preprocessing, model training,
-    evaluation, and inference. It also handles session state management and user interactions
-    for training and downloading the model.
-    """
 
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
@@ -38,29 +33,31 @@ def sentiment_analysis_cofig(st, input_value):
 
         st.write("Training the model...")
         sentiment_analysis_cl.train(epochs=input_value)
-        history = dataset_prediction_cl.history
+
+        training_loss = sentiment_analysis_cl.train_losses
+        val_loss = sentiment_analysis_cl.val_losses
         preprocess_placeholder.empty()
         split_placeholder.empty()
         compile_placeholder.empty()
         train_placeholder.empty()
 
-        st.session_state["model_obj"] = dataset_prediction_cl
+        st.session_state["model_obj"] = sentiment_analysis_cl
         st.session_state["model_trained"] = True
 
         training_logs = []
-        for epoch in range(len(history.history['loss'])):
+        for epoch in range(input_value):
             log = {
                 "epoch": epoch + 1,
-                "loss": history.history['loss'][epoch],
-                "val_loss": history.history['val_loss'][epoch],
+                "training loss": training_loss[epoch],
+                "val_loss": val_loss[epoch],
             }
             training_logs.append(log)
 
         st.session_state["training_logs"] = json.dumps(training_logs, indent=6)
 
-    dataset_prediction_cl = st.session_state["model_obj"]
+    sentiment_analysis_cl = st.session_state["model_obj"]
 
-    if dataset_prediction_cl:
+    if sentiment_analysis_cl:
         """
         Displays training logs, evaluation metrics, and plots. It also provides an option 
         to download the trained model and perform inference on the dataset.
@@ -69,14 +66,9 @@ def sentiment_analysis_cofig(st, input_value):
         st.write("Training Logs")
         traning_log.logs(st)
 
-        evaluate_model_matrics = dataset_prediction_cl.evaluate_model()
 
-        st.subheader("Evaluation Metrics Training Logs")
-        st.session_state["training_logs"] = evaluate_model_matrics
-        traning_log.logs(st)
-
-        st.subheader("Training Metrics")
-        image = dataset_prediction_cl.plot_training_loss()
+        st.subheader("Training & Val Metrics")
+        image = sentiment_analysis_cl.plot_losses()
 
         st.image(image, caption="Training Loss Per Epoch", use_container_width=True)
 
@@ -85,24 +77,32 @@ def sentiment_analysis_cofig(st, input_value):
 
         if download_option == "Yes":
             import io
-            import h5py
+            import torch
 
             model_buffer = io.BytesIO()
-
-            with h5py.File(model_buffer, 'w') as f:
-                dataset_prediction_cl.model.save(f)
-
+            # Assuming `sentiment_analysis_cl` is your model class instance and `net` is your model
+            torch.save(sentiment_analysis_cl.net.state_dict(), model_buffer)
             model_buffer.seek(0)
 
             st.download_button(
-                label="Download Model as .h5",
+                label="Download Model as .pth",
                 data=model_buffer,
-                file_name="trained_model.h5",
+                file_name="trained_model.pth",
                 mime="application/octet-stream"
             )
 
         st.subheader("Inference")
-        inference_button = st.button("Inference", key="inference_button")
-        if inference_button:
-            predicted_dataset = dataset_prediction_cl.prediction()
-            st.dataframe(predicted_dataset)
+        user_input = st.text_input("Enter your message:", key="user_input")
+
+        inference_button = st.button("Analyze Sentiment", key="inference_button")
+        if inference_button and user_input:
+            predicted_sentiment = sentiment_analysis_cl.predict(user_input)
+            prediction_text = None
+            if predicted_sentiment == 1:
+                prediction_text = "Positive"
+            else:
+                prediction_text = "Negative"
+
+            # Display the user input and the corresponding sentiment prediction
+            st.write("Message: ", user_input)
+            st.write("Predicted Sentiment: ", prediction_text)
