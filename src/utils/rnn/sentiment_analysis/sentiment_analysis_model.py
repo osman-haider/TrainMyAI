@@ -6,10 +6,16 @@ import torch.nn as nn
 from collections import Counter
 import matplotlib.pyplot as plt
 from src.utils.rnn.sentiment_analysis import sentiment_rnn
+import os
+import io
+import seaborn as sns
+from PIL import Image
 
 class SentimentAnalysis:
     def __init__(self, seq_length=30, batch_size=50):
-        self.filepath = "extracted_folder/Tweets.csv"
+        self.folder_path = "extracted_folder"
+        self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.csv')][0]
+        self.filepath = os.path.join(self.folder_path, self.file_name)
         self.seq_length = seq_length
         self.batch_size = batch_size
         self.punctuation = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~'
@@ -19,8 +25,8 @@ class SentimentAnalysis:
         self.test_loader = None
         self.net = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.train_losses = None
-        self.val_losses = None
+        self.train_losses = []
+        self.val_losses = []
 
     def load_data(self):
         data = pd.read_csv(self.filepath)
@@ -85,24 +91,21 @@ class SentimentAnalysis:
         self.net = sentiment_rnn.SentimentRNN(vocab_size, output_size, embedding_dim, hidden_dim, n_layers, drop_prob)
         self.net.to(self.device)
 
-    def train(self, epochs=10):
-        lr = 0.001
-        clip = 5
+    def train(self, epochs=10, lr=0.001, clip=5):
         criterion = nn.BCELoss()
         optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
-        train_losses = []
-        val_losses = []
 
-        self.net.train()
         for epoch in range(epochs):
-            h = self.net.init_hidden(self.batch_size)
+            train_losses = []
+            val_losses = []
 
+            # Training phase
+            self.net.train()
             for inputs, labels in self.train_loader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                h = tuple([each.data for each in h])
-
                 self.net.zero_grad()
-                output, h = self.net(inputs, h)
+
+                output, _ = self.net(inputs, self.net.init_hidden(inputs.size(0)))
                 loss = criterion(output.squeeze(), labels.float())
                 loss.backward()
                 nn.utils.clip_grad_norm_(self.net.parameters(), clip)
@@ -110,17 +113,22 @@ class SentimentAnalysis:
 
                 train_losses.append(loss.item())
 
-                if len(train_losses) % 100 == 0:
-                    self.net.eval()
-                    val_h = self.net.init_hidden(self.batch_size)
-                    val_loss = self.validate(val_h, criterion)
-                    val_losses.append(val_loss)
-                    self.net.train()
+            # Validation phase
+            self.net.eval()
+            with torch.no_grad():
+                for inputs, labels in self.valid_loader:
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    output, _ = self.net(inputs, self.net.init_hidden(inputs.size(0)))
+                    loss = criterion(output.squeeze(), labels.float())
+                    val_losses.append(loss.item())
 
-            print(f"Epoch: {epoch+1}, Train Loss: {np.mean(train_losses):.4f}, Validation Loss: {np.mean(val_losses):.4f}")
+            # Record the average loss per epoch
+            self.train_losses.append(np.mean(train_losses))
+            self.val_losses.append(np.mean(val_losses))
 
-        self.train_losses = train_losses
-        self.val_losses = val_losses
+            # Print out the losses for the epoch
+            print(
+                f"Epoch: {epoch + 1}, Train Loss: {self.train_losses[-1]:.4f}, Validation Loss: {self.val_losses[-1]:.4f}")
 
     def validate(self, hidden, criterion):
         val_losses = []
@@ -142,7 +150,12 @@ class SentimentAnalysis:
         plt.ylabel('Loss')
         plt.legend()
         plt.title('Training and Validation Loss Over Time')
-        plt.show()
+        sns.despine()
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+        return Image.open(buf)
 
     def predict(self, test_review):
         self.net.eval()
@@ -156,20 +169,3 @@ class SentimentAnalysis:
 
         pred = torch.round(output.squeeze())
         return pred.item()
-
-
-sa = SentimentAnalysis()
-
-# Step 2: Load and preprocess the data
-sa.load_data()
-
-# Step 3: Initialize the model
-sa.init_model()
-
-# Step 4: Train the model
-# You can adjust epochs, learning rate (lr), and clip according to your needs
-sa.train(epochs=5, )
-
-test_review = "This product was great!"
-predicted_sentiment = sa.predict(test_review)
-print(f'Predicted Sentiment: {"Positive" if predicted_sentiment == 1 else "Negative"}')
