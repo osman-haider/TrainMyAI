@@ -23,7 +23,6 @@ class SentimentAnalysis:
         self.val_losses = None
 
     def load_data(self):
-        print(self.filepath)
         data = pd.read_csv(self.filepath)
         reviews = np.array(data['text'])[:14000]
         labels = np.array(data['airline_sentiment'])[:14000]
