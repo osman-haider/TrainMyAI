@@ -122,7 +122,16 @@ Provide your dataset as a zip file with the following structure:
     ```
     dataset_name.csv
     ```
-
+### For RNN Models:
+Provide your dataset as a zip file with the following structure:
+- Sentiment Analysis:
+  - Zip the folders directly without nesting them under a parent folder. For example:
+    ```
+    dataset_name.csv
+    ```
+  - Dataset must contain two folders "text" and "label":
+    - text: Text could be any language
+    - label: positive or negative, 0 or 1
 ## Project Status
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
