@@ -3,6 +3,7 @@ from src.utils.cnn.object_detection import object_detection_ui
 from src.utils.cnn.face_recognition import face_recognition_ui
 from src.utils.cnn.style_transfor import style_transfor_ui
 from src.utils.ann.dataset_prediction import dataset_prediction_ui
+from src.utils.rnn.sentiment_analysis import sentiment_analysis_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -43,7 +44,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
 
     elif search_method == "RNN":
         if selected_parent == "Sentiment Analysis":
-            st.info("RNN ---> Sentiment Analysis")
+            sentiment_analysis_ui.sentiment_analysis_cofig(st, input_value)
         elif selected_parent == "Time Series Forecasting":
             st.info("RNN ---> Time Series Forecasting")
         elif selected_parent == "Text Generation":
