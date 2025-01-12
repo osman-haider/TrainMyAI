@@ -1,14 +1,14 @@
 from src.utils.rnn.sentiment_analysis import sentiment_analysis_model
-from src.utils.cnn import plots
-import tensorflow as tf
 import json
 from src.utils import traning_log
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-
 def sentiment_analysis_cofig(st, input_value):
+    """
+    Configure the sentiment analysis model, including training and tracking the state.
+    """
 
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
@@ -58,14 +58,8 @@ def sentiment_analysis_cofig(st, input_value):
     sentiment_analysis_cl = st.session_state["model_obj"]
 
     if sentiment_analysis_cl:
-        """
-        Displays training logs, evaluation metrics, and plots. It also provides an option 
-        to download the trained model and perform inference on the dataset.
-        """
-
         st.write("Training Logs")
         traning_log.logs(st)
-
 
         st.subheader("Training & Val Metrics")
         image = sentiment_analysis_cl.plot_losses()
@@ -80,7 +74,6 @@ def sentiment_analysis_cofig(st, input_value):
             import torch
 
             model_buffer = io.BytesIO()
-            # Assuming `sentiment_analysis_cl` is your model class instance and `net` is your model
             torch.save(sentiment_analysis_cl.net.state_dict(), model_buffer)
             model_buffer.seek(0)
 
@@ -103,6 +96,5 @@ def sentiment_analysis_cofig(st, input_value):
             else:
                 prediction_text = "Negative"
 
-            # Display the user input and the corresponding sentiment prediction
             st.write("Message: ", user_input)
             st.write("Predicted Sentiment: ", prediction_text)
