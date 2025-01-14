@@ -54,15 +54,12 @@ TrainMyAI supports the following deep learning models and tasks:
 
 3. **Recurrent Neural Networks (RNN):**
    - Sentiment Analysis
-   - Time Series Forecasting
    - Text Generation
    - Machine Translation
 
 4. **Long Short-Term Memory Networks (LSTM):**
    - Text Summarization
-   - Language Modeling
-   - Time Series Forecasting
-   - Dataset Prediction
+   - Text Generation
 
 5. **Generative Adversarial Networks (GAN):**
    - Image Generation
