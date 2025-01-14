@@ -4,6 +4,7 @@ from src.utils.cnn.face_recognition import face_recognition_ui
 from src.utils.cnn.style_transfor import style_transfor_ui
 from src.utils.ann.dataset_prediction import dataset_prediction_ui
 from src.utils.rnn.sentiment_analysis import sentiment_analysis_ui
+from src.utils.rnn.text_generation import text_generation_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -28,27 +29,20 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
                 multiclass_classfication_ui.multiclass_classification_cofig(st, input_value)
         elif selected_parent == "Object Detection":
             object_detection_ui.object_detection_cofig(st, input_value)
-        elif selected_parent == "Image Segmentation":
-            st.info("CNN ---> Image Segmentation")
         elif selected_parent == "Face Recognition":
             face_recognition_ui.face_recognition_cofig(st, input_value)
         elif selected_parent == "Style Transfer":
             style_transfor_ui.style_transfor_cofig(st, input_value)
-            st.info("CNN ---> Style Transfer")
 
     elif search_method == "ANN":
         if selected_parent == "Dataset Prediction":
             dataset_prediction_ui.dataset_prediction_cofig(st, input_value)
-        elif selected_parent == "Credit Card Fraud Detection":
-            st.info("ANN ---> Credit Card Fraud Detection")
 
     elif search_method == "RNN":
         if selected_parent == "Sentiment Analysis":
             sentiment_analysis_ui.sentiment_analysis_cofig(st, input_value)
-        elif selected_parent == "Time Series Forecasting":
-            st.info("RNN ---> Time Series Forecasting")
         elif selected_parent == "Text Generation":
-            st.info("RNN ---> Text Generation")
+            text_generation_ui.text_generation_cofig(st, input_value)
         elif selected_parent == "Machine Translation":
             st.info("RNN ---> Machine Translation")
 
@@ -57,10 +51,6 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
             st.info("LSTM ---> Text Summarization")
         elif selected_parent == "Language Modeling":
             st.info("LSTM ---> Language Modeling")
-        elif selected_parent == "Time Series Forecasting":
-            st.info("LSTM ---> Time Series Forecasting")
-        elif selected_parent == "Dataset Prediction":
-            st.info("LSTM ---> Dataset Prediction")
 
     elif search_method == "GAN":
         if selected_parent == "Image Generation":
