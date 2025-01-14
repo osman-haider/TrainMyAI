@@ -33,7 +33,7 @@ def sidebar_ui(st):
         )
 
         if search_method == "CNN":
-            parent_options = ["Image Classification", "Object Detection", "Image Segmentation", "Face Recognition", "Style Transfer"]
+            parent_options = ["Image Classification", "Object Detection", "Face Recognition", "Style Transfer"]
             selected_parent = st.selectbox(
                 "Select type of Main Model:",
                 ["Select an option"] + parent_options,
@@ -49,7 +49,7 @@ def sidebar_ui(st):
                 )
 
         elif search_method == "ANN":
-            parent_options = ["Dataset Prediction", "Credit Card Fraud Detection"]
+            parent_options = ["Dataset Prediction"]
             selected_parent = st.selectbox(
                 "Select type of Main Model:",
                 ["Select an option"] + parent_options,
@@ -57,7 +57,7 @@ def sidebar_ui(st):
             )
 
         elif search_method == "RNN":
-            parent_options = ["Sentiment Analysis", "Time Series Forecasting", "Text Generation", "Machine Translation"]
+            parent_options = ["Sentiment Analysis", "Text Generation", "Machine Translation"]
             selected_parent = st.selectbox(
                 "Select type of Main Model:",
                 ["Select an option"] + parent_options,
@@ -65,7 +65,7 @@ def sidebar_ui(st):
             )
 
         elif search_method == "LSTM":
-            parent_options = ["Text Summarization", "Language Modeling", "Time Series Forecasting", "Dataset Prediction"]
+            parent_options = ["Text Summarization", "Language Modeling"]
             selected_parent = st.selectbox(
                 "Select type of Main Model:",
                 ["Select an option"] + parent_options,
