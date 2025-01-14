@@ -42,6 +42,7 @@ class TextGenModel:
             for i in range(1, len(tokens)):
                 sequences.append(tokens[:i+1])
         self.max_len = max([len(x) for x in sequences])
+        print(f"Max sequence length determined during preprocessing: {self.max_len}")  # Debug output
         padded_sequences = pad_sequences(sequences, maxlen=self.max_len, padding='pre')
         X = padded_sequences[:, :-1]
         y = to_categorical(padded_sequences[:, -1], num_classes=self.vocab_size)
@@ -61,17 +62,13 @@ class TextGenModel:
         self.history = self.model.fit(self.X, self.y, epochs=epochs, batch_size=self.batch_size)
 
     def plot_loss(self):
+        plt.figure()
         plt.plot(self.history.history['loss'])
         plt.title('Model Loss')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         sns.despine()
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        plt.close()
-        return Image.open(buf)
-
+        return plt
 
     def plot_accuracy(self):
         plt.plot(self.history.history['accuracy'])
@@ -79,18 +76,16 @@ class TextGenModel:
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
         sns.despine()
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        plt.close()
-        return Image.open(buf)
+        return plt
 
     def predict_next_words(self, initial_text, num_words=10):
         text = initial_text.lower()
         results = []  # Initialize a list to store the results
         for _ in range(num_words):
             token_text = self.tokenizer.texts_to_sequences([text])[0]
+            # Ensure that padding matches the training configuration
             padded_token_text = pad_sequences([token_text], maxlen=self.max_len, padding='pre')
+            print(f"Padded sequence length during prediction: {padded_token_text.shape}")  # Debug output
             pos = np.argmax(self.model.predict(padded_token_text))
             next_word = [word for word, index in self.tokenizer.word_index.items() if index == pos]
             if next_word:

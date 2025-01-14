@@ -4,7 +4,6 @@ from src.utils.cnn.face_recognition import face_recognition_ui
 from src.utils.cnn.style_transfor import style_transfor_ui
 from src.utils.ann.dataset_prediction import dataset_prediction_ui
 from src.utils.rnn.sentiment_analysis import sentiment_analysis_ui
-from src.utils.rnn.text_generation import text_generation_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -42,6 +41,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
         if selected_parent == "Sentiment Analysis":
             sentiment_analysis_ui.sentiment_analysis_cofig(st, input_value)
         elif selected_parent == "Text Generation":
+            from src.utils.rnn.text_generation import text_generation_ui
             text_generation_ui.text_generation_cofig(st, input_value)
         elif selected_parent == "Machine Translation":
             st.info("RNN ---> Machine Translation")
@@ -50,7 +50,9 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
         if selected_parent == "Text Summarization":
             st.info("LSTM ---> Text Summarization")
         elif selected_parent == "Language Modeling":
-            st.info("LSTM ---> Language Modeling")
+            from src.utils.lstm.text_generation import text_generation_ui
+            text_generation_ui.text_generation_cofig(st, input_value)
+
 
     elif search_method == "GAN":
         if selected_parent == "Image Generation":
