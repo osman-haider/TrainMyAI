@@ -15,6 +15,7 @@ class TextGenModel:
         self.folder_path = "extracted_folder"
         self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.txt')][0]
         self.filepath = os.path.join(self.folder_path, self.file_name)
+        print(f"self.filepath: {self.filepath}")
         self.char_step = 3
         self.sequence_length = 40
         self.batch_size = 18
@@ -29,8 +30,8 @@ class TextGenModel:
         self.history = None
 
     def load_data(self):
-        path = keras.utils.get_file('nietzsche.txt', origin=self.filepath)
-        with io.open(path, encoding='utf-8') as f:
+
+        with io.open(self.filepath, encoding='utf-8') as f:
             self.text = f.read().lower()
         self.chars = sorted(list(set(self.text)))
         self.char_indices = {c: i for i, c in enumerate(self.chars)}
