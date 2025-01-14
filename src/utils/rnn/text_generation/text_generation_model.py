@@ -10,7 +10,7 @@ import seaborn as sns
 from PIL import Image
 
 
-class TextModel:
+class TextGenModel:
     def __init__(self):
         self.folder_path = "extracted_folder"
         self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.txt')][0]
@@ -26,6 +26,7 @@ class TextModel:
         self.model = None
         self.x = None
         self.y = None
+        self.history = None
 
     def load_data(self):
         path = keras.utils.get_file('nietzsche.txt', origin=self.filepath)
@@ -58,10 +59,10 @@ class TextModel:
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
     def train_model(self, epochs):
-        return self.model.fit(self.x, self.y, batch_size=self.batch_size, epochs=epochs)
+        self.history = self.model.fit(self.x, self.y, batch_size=self.batch_size, epochs=epochs)
 
-    def plot_history(self, history):
-        plt.plot(history.history['loss'])
+    def plot_losses(self):
+        plt.plot(self.history.history['loss'])
         plt.title('Model Training Loss')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
