@@ -10,14 +10,14 @@ import os
 import seaborn as sns
 from PIL import Image
 
-class TextModel:
+class TextGenModel:
     def __init__(self):
         self.folder_path = "extracted_folder"
         self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.txt')][0]
         self.filepath = os.path.join(self.folder_path, self.file_name)
         self.embedding_dim = 100
         self.lstm_units = 150
-        self.epochs = 32
+        self.batch_size = 32
         self.tokenizer = Tokenizer()
         self.model = None
         self.vocab_size = None
@@ -57,8 +57,8 @@ class TextModel:
         ])
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    def train_model(self, batch_size):
-        self.history = self.model.fit(self.X, self.y, epochs=self.epochs, batch_size=batch_size)
+    def train_model(self, epochs):
+        self.history = self.model.fit(self.X, self.y, epochs=epochs, batch_size=self.batch_size)
 
     def plot_loss(self):
         plt.plot(self.history.history['loss'])
@@ -85,7 +85,7 @@ class TextModel:
         plt.close()
         return Image.open(buf)
 
-    def predict(self, initial_text, num_words=10):
+    def predict_next_words(self, initial_text, num_words=10):
         text = initial_text.lower()
         results = []  # Initialize a list to store the results
         for _ in range(num_words):
