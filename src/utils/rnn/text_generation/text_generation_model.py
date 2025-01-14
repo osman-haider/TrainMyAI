@@ -76,20 +76,22 @@ class TextGenModel:
 
     def predict_next_chars(self, initial_text, num_chars=20):
         text = initial_text[-self.sequence_length:]
+        predictions = []
         for j in range(num_chars):
             x_pred = np.zeros((1, self.sequence_length, len(self.char_indices)), dtype=bool)
             for t, char in enumerate(text):
                 if char in self.char_indices:
                     x_pred[0, t, self.char_indices[char]] = True
                 else:
-                    print(f"Character '{char}' not in training set.")
-                    return None
+                    predictions.append(f"Character '{char}' not in training set.")
+                    return predictions
             preds = self.model.predict(x_pred, verbose=0)[0]
             next_index = self.sample(preds)
             next_char = self.indices_char[next_index]
             text += next_char
             text = text[1:]
-            print(f"Prediction after {j+1} character(s): {initial_text + text[-(j+1):]}")
+            predictions.append(f"Prediction after {j + 1} character(s): {initial_text + text[-(j + 1):]}")
+        return predictions
 
     @staticmethod
     def sample(preds, temperature=1.0):

@@ -89,16 +89,10 @@ def text_generation_cofig(st, input_value):
             )
 
         st.subheader("Inference")
-        user_input = st.text_input("Enter your message:", key="user_input")
+        user_input = st.text_input("Enter your text:", key="user_input")
 
-        inference_button = st.button("Analyze Sentiment", key="inference_button")
+        inference_button = st.button("Text Generation", key="inference_button")
         if inference_button and user_input:
-            predicted_sentiment = sentiment_analysis_cl.predict(user_input)
-            prediction_text = None
-            if predicted_sentiment == 1:
-                prediction_text = "Positive"
-            else:
-                prediction_text = "Negative"
-
-            st.write("Message: ", user_input)
-            st.write("Predicted Sentiment: ", prediction_text)
+            predictions = text_generation_cl.predict_next_chars(user_input)
+            for prediction in predictions:
+                st.write(prediction)
