@@ -50,6 +50,7 @@ class TextGenModel:
         self.y = y
 
     def build_model(self):
+        print(f"self.X.shape[1]: {self.X.shape[1]}")
         self.model = Sequential([
             Embedding(input_dim=self.vocab_size, output_dim=self.embedding_dim, input_length=self.X.shape[1]),
             LSTM(self.lstm_units, return_sequences=True),
@@ -80,15 +81,15 @@ class TextGenModel:
 
     def predict_next_words(self, initial_text, num_words=10):
         text = initial_text.lower()
-        results = []  # Initialize a list to store the results
+        results = []
         for _ in range(num_words):
             token_text = self.tokenizer.texts_to_sequences([text])[0]
-            # Ensure that padding matches the training configuration
-            padded_token_text = pad_sequences([token_text], maxlen=self.max_len, padding='pre')
-            print(f"Padded sequence length during prediction: {padded_token_text.shape}")  # Debug output
-            pos = np.argmax(self.model.predict(padded_token_text))
-            next_word = [word for word, index in self.tokenizer.word_index.items() if index == pos]
+            padded_token_text = pad_sequences([token_text], maxlen=self.X.shape[1], padding='pre')
+            prediction = self.model.predict(padded_token_text)
+            pos = np.argmax(prediction)
+            next_word = [word for word, index in self.tokenizer.word_index.items() if index == pos][
+                0] if pos > 0 else ""
             if next_word:
-                text += ' ' + next_word[0]
-                results.append(text)  # Append the updated text to the results list
+                text += ' ' + next_word
+                results.append(text)
         return results
