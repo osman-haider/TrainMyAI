@@ -112,6 +112,9 @@ Provide your dataset as a zip file with the following structure:
     StyleImages/
       img1.jpg
     ```
+- Face Recognition
+  - 
+
 ### For ANN Models:
 Provide your dataset as a zip file with the following structure:
 - Dataset Prediction:
@@ -129,6 +132,29 @@ Provide your dataset as a zip file with the following structure:
   - Dataset must contain two folders "text" and "label":
     - text: Text could be any language
     - label: positive or negative, 0 or 1
+
+- Text Generation
+  - Dataset must be in as a text file, Zip the folders directly without nesting them under a parent folder. For example:
+    ```
+    dataset_name.txt
+    ```
+- Language Translation
+  - Dataset must be in as a text file, Zip the folders directly without nesting them under a parent folder. For example:
+    ```
+    dataset_name.csv
+    ```
+    - Dataset must contain 2 columns with the name of Language 1, Language 2.
+      - Language 1: Source Language which you want to translate
+      - Language 2: Destination Language means Destination language.
+      - Suppose: English to French
+      
+### For LSTM Models:
+Provide your dataset as a zip file with the following structure:
+- Text Generation:
+  - Zip the folders directly without nesting them under a parent folder. For example:
+    ```
+    dataset_name.txt
+    ```
 ## Project Status
 TrainMyAI is a work in progress. Development is ongoing, and new features and updates will be documented in the README file. Your feedback and contributions are welcome!
 
