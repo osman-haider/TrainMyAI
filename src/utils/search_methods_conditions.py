@@ -4,6 +4,7 @@ from src.utils.cnn.face_recognition import face_recognition_ui
 from src.utils.cnn.style_transfor import style_transfor_ui
 from src.utils.ann.dataset_prediction import dataset_prediction_ui
 from src.utils.rnn.sentiment_analysis import sentiment_analysis_ui
+from src.utils.rnn.language_translation import language_translation_ui
 
 def medthos_traning(st, search_method, selected_parent, selected_child, input_value):
     """
@@ -44,7 +45,7 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
             from src.utils.rnn.text_generation import text_generation_ui
             text_generation_ui.text_generation_cofig(st, input_value)
         elif selected_parent == "Machine Translation":
-            st.info("RNN ---> Machine Translation")
+            language_translation_ui.language_translation_cofig(st, input_value)
 
     elif search_method == "LSTM":
         if selected_parent == "Text Summarization":
