@@ -2,6 +2,7 @@ from src.utils.rnn.language_translation import language_translation_model
 import json
 from src.utils import traning_log
 import warnings
+from src.utils.cnn import plots
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -54,46 +55,47 @@ def language_translation_cofig(st, input_value):
 
         st.session_state["training_logs"] = json.dumps(training_logs, indent=6)
 
-    sentiment_analysis_cl = st.session_state["model_obj"]
+    language_translation_cl = st.session_state["model_obj"]
 
-    if sentiment_analysis_cl:
+    if language_translation_cl:
         st.write("Training Logs")
         traning_log.logs(st)
 
-        st.subheader("Training & Val Metrics")
-        image = sentiment_analysis_cl.plot_losses()
-
-        st.image(image, caption="Training Loss Per Epoch", use_container_width=True)
+        st.subheader("Training Metrics")
+        col1, col2 = st.columns(2)
+        plot = plots.training_metrics(language_translation_cl.history)
+        with col1:
+            st.pyplot(plot.plot_loss())
+        with col2:
+            st.pyplot(plot.plot_accuracy())
 
         st.subheader("Download Trained Model")
         download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
 
         if download_option == "Yes":
             import io
-            import torch
+            import h5py
 
             model_buffer = io.BytesIO()
-            torch.save(sentiment_analysis_cl.net.state_dict(), model_buffer)
+
+            with h5py.File(model_buffer, 'w') as f:
+                language_translation_cl.model.save(f)
+
             model_buffer.seek(0)
 
             st.download_button(
-                label="Download Model as .pth",
+                label="Download Model as .h5",
                 data=model_buffer,
-                file_name="trained_model.pth",
+                file_name="trained_model.h5",
                 mime="application/octet-stream"
             )
 
         st.subheader("Inference")
         user_input = st.text_input("Enter your message:", key="user_input")
 
-        inference_button = st.button("Analyze Sentiment", key="inference_button")
+        inference_button = st.button("Translate Text", key="inference_button")
         if inference_button and user_input:
-            predicted_sentiment = sentiment_analysis_cl.predict(user_input)
-            prediction_text = None
-            if predicted_sentiment == 1:
-                prediction_text = "Positive"
-            else:
-                prediction_text = "Negative"
+            prediction_text = language_translation_cl.predict(user_input)
 
-            st.write("Message: ", user_input)
-            st.write("Predicted Sentiment: ", prediction_text)
+            st.write("Original Text: ", user_input)
+            st.write("Predicted Text: ", prediction_text)
