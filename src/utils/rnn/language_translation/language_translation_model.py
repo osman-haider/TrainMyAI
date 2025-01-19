@@ -1,20 +1,15 @@
 import numpy as np
 import pandas as pd
-import collections
+from keras.src.legacy.preprocessing.text import Tokenizer
 from tf_keras.models import Sequential
-from tf_keras.layers import GRU, Dense, TimeDistributed, Activation, Dropout, Embedding
+from tf_keras.layers import GRU, Dense, TimeDistributed, Dropout, Embedding
 from tf_keras.optimizers import Adam
 from tf_keras.losses import sparse_categorical_crossentropy
-from keras.src.legacy.preprocessing.text import Tokenizer
 from tf_keras.utils import pad_sequences
-import matplotlib.pyplot as plt
 import os
-import io
-import seaborn as sns
-from PIL import Image
-
 
 class LanguageTranslationModel:
+    # Initialize the model, tokenizers, and start the data processing and model building
     def __init__(self):
         self.folder_path = "extracted_folder"
         self.file_name = [f for f in os.listdir(self.folder_path) if f.endswith('.csv')][0]
@@ -31,12 +26,14 @@ class LanguageTranslationModel:
         self.load_and_preprocess_data()
         self.build_model()
 
+    # Load data from CSV and preprocess it
     def load_and_preprocess_data(self):
         df = pd.read_csv(self.data_path)
         self.Language_1_sentences = df['Language 1'].values
         self.Language_2_sentences = df['Language 2'].values
         self.preprocess()
 
+    # Tokenize text data and prepare it for training
     def preprocess(self):
         x_tk, y_tk = Tokenizer(), Tokenizer()
         x_tk.fit_on_texts(self.Language_1_sentences)
@@ -48,14 +45,17 @@ class LanguageTranslationModel:
         self.preprocess_y = self.preprocess_y.reshape(*self.preprocess_y.shape, 1)
         self.update_vocab_sizes()
 
+    # Update vocabulary sizes and input shape for the model configuration
     def update_vocab_sizes(self):
         self.Language_1_vocab_size = len(self.Language_1_tokenizer.word_index) + 1
         self.Language_2_vocab_size = len(self.Language_2_tokenizer.word_index) + 1
         self.input_shape = (None, self.preprocess_x.shape[-1])
 
+    # Pad sequences to ensure uniform input size
     def pad(self, sequences, length=None):
         return pad_sequences(sequences, maxlen=length, padding='post')
 
+    # Build a neural network model for language translation
     def build_model(self):
         learning_rate = 0.005
         self.model = Sequential([
@@ -67,20 +67,12 @@ class LanguageTranslationModel:
         ])
         self.model.compile(loss=sparse_categorical_crossentropy, optimizer=Adam(learning_rate), metrics=['accuracy'])
 
+    # Train the model with the given dataset
     def train(self, epochs=10, batch_size=1024, validation_split=0.2):
         self.history = self.model.fit(self.preprocess_x, self.preprocess_y, batch_size=batch_size, epochs=epochs,
                                       validation_split=validation_split)
 
-    def plot_history(self):
-        plt.plot(self.history.history['loss'], label='loss')
-        plt.plot(self.history.history['val_loss'], label='val_loss')
-        plt.legend()
-        plt.show()
-        plt.plot(self.history.history['accuracy'], label='accuracy')
-        plt.plot(self.history.history['val_accuracy'], label='val_accuracy')
-        plt.legend()
-        plt.show()
-
+    # Predict translation of input text
     def predict(self, text):
         sequence = [self.Language_1_tokenizer.word_index.get(word, 0) for word in text.split()]
         padded_sequence = self.pad([sequence], length=self.input_shape[1])

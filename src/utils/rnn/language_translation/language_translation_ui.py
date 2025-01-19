@@ -6,9 +6,9 @@ from src.utils.cnn import plots
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+# Function for setting up and handling the language translation configuration
 def language_translation_cofig(st, input_value):
-
-
+    # Check for session state existence and initialize if absent
     if "model_trained" not in st.session_state:
         st.session_state["model_trained"] = False
     if "model_obj" not in st.session_state:
@@ -16,9 +16,12 @@ def language_translation_cofig(st, input_value):
     if "training_logs" not in st.session_state:
         st.session_state["training_logs"] = ""
 
+    # Initialize language translation class
     language_translation_cl = language_translation_model.LanguageTranslationModel()
 
+    # Check if the model has been trained, and handle training if not
     if not st.session_state["model_trained"]:
+        # Placeholders for UI updates during training
         preprocess_placeholder = st.empty()
         split_placeholder = st.empty()
         compile_placeholder = st.empty()
@@ -39,9 +42,11 @@ def language_translation_cofig(st, input_value):
         compile_placeholder.empty()
         train_placeholder.empty()
 
+        # Update session state after training
         st.session_state["model_obj"] = language_translation_cl
         st.session_state["model_trained"] = True
 
+        # Collect training logs
         training_logs = []
         for epoch in range(input_value):
             log = {
@@ -55,12 +60,14 @@ def language_translation_cofig(st, input_value):
 
         st.session_state["training_logs"] = json.dumps(training_logs, indent=6)
 
+    # Retrieve the model from session state if available
     language_translation_cl = st.session_state["model_obj"]
 
     if language_translation_cl:
         st.write("Training Logs")
         traning_log.logs(st)
 
+        # Display training metrics in UI
         st.subheader("Training Metrics")
         col1, col2 = st.columns(2)
         plot = plots.training_metrics(language_translation_cl.history)
@@ -69,6 +76,7 @@ def language_translation_cofig(st, input_value):
         with col2:
             st.pyplot(plot.plot_accuracy())
 
+        # Provide an option to download the trained model
         st.subheader("Download Trained Model")
         download_option = st.radio("Do you want to download the trained model?", ("No", "Yes"))
 
@@ -78,6 +86,7 @@ def language_translation_cofig(st, input_value):
 
             model_buffer = io.BytesIO()
 
+            # Save the model to a buffer
             with h5py.File(model_buffer, 'w') as f:
                 language_translation_cl.model.save(f)
 
@@ -90,6 +99,7 @@ def language_translation_cofig(st, input_value):
                 mime="application/octet-stream"
             )
 
+        # Handle text input and translation inference
         st.subheader("Inference")
         user_input = st.text_input("Enter your message:", key="user_input")
 
