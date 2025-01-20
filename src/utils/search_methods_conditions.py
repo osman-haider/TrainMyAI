@@ -48,9 +48,9 @@ def medthos_traning(st, search_method, selected_parent, selected_child, input_va
             language_translation_ui.language_translation_cofig(st, input_value)
 
     elif search_method == "LSTM":
-        if selected_parent == "Text Summarization":
-            st.info("LSTM ---> Text Summarization")
-        elif selected_parent == "Language Modeling":
+        # if selected_parent == "Text Summarization":
+        #     st.info("LSTM ---> Text Summarization")
+        if selected_parent == "Language Modeling":
             from src.utils.lstm.text_generation import text_generation_ui
             text_generation_ui.text_generation_cofig(st, input_value)
 

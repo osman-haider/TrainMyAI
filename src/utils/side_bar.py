@@ -65,7 +65,7 @@ def sidebar_ui(st):
             )
 
         elif search_method == "LSTM":
-            parent_options = ["Text Summarization", "Language Modeling"]
+            parent_options = ["Language Modeling"]
             selected_parent = st.selectbox(
                 "Select type of Main Model:",
                 ["Select an option"] + parent_options,
