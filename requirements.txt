@@ -54,3 +54,5 @@ watchdog==6.0.0
 scipy
 scikit-image
 scikit-learn
+tf-keras
+torch
